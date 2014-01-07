@@ -9,6 +9,8 @@ describe "Authentication" do
 
     it { should have_content('Sign in') }
     it { should have_title('Sign in') }
+    it { should_not have_content('Profile')}
+    it { should_not have_content('Settings') }
   end
 
   describe "signin" do
@@ -114,6 +116,21 @@ describe "Authentication" do
         before { delete user_path(user) }
         specify { expect(response).to redirect_to(root_url) }
       end
+  end
+
+    describe "as a signed in user" do
+      let(:user) { FactoryGirl.create(:user) }
+      before { sign_in user,  no_capybara: true }
+
+        describe "visit 'new' action" do
+          before { get new_user_path }
+          specify { expect(response).to redirect_to(root_url) }
+        end
+
+        describe "visit 'create' action" do
+          before { post users_path }
+          specify { expect(response).to redirect_to(root_url) }
+        end
     end
   end
 end

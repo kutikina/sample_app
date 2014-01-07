@@ -17,6 +17,9 @@
       <%= yield %>
       <%= render 'layouts/footer' %>
       <%= debug(params) if Rails.env.development? %>
+      <%= add_get %>
+      <%= add_headers %>
+      <%= add_full_path %>
     </div>
   </body>
 </html>
