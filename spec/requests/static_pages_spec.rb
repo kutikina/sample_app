@@ -23,8 +23,8 @@ describe "Static pages" do
     describe "for signed-in users" do
       let(:user) { FactoryGirl.create(:user) }
       before do
-        FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
-        FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+        FactoryGirl.create(:micropost, user: user, content: "Lorem")
+        FactoryGirl.create(:micropost, user: user, content: "Ipsum")
         sign_in user
         visit root_path
       end
@@ -34,8 +34,55 @@ describe "Static pages" do
           expect(page).to have_selector("li##{item.id}", text: item.content)
         end
       end
+
+      it "should show the user's feed count" do
+        should have_content('2 microposts')
+      end
+
+      let(:user1post) { FactoryGirl.create(:user) }
+      before do
+        FactoryGirl.create(:micropost, user: user1post, content: "Ipsum")
+      end
+
+      it "should should pluralise the user's post count" do
+        users = [user, user1post]
+        users.each do |user|
+          if user.microposts.count == 1
+            should have_content('micropost')
+          else 
+            should have_content('microposts')
+          end
+        end
+      end
     end
+    describe "pagination of user's posts" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        31.times {FactoryGirl.create(:micropost, user: user, content: "Lorem") }
+        sign_in user
+        visit root_path
+      end
+
+      it "should paginate the users posts" do
+        should have_selector('div.pagination')
+      end
+    end
+
+    describe "micropost delete links" do
+      let(:user) { FactoryGirl.create(:user) }
+      let(:wronguser) { FactoryGirl.create(:user) }
+      let!(:wrongpost) { FactoryGirl.create(:micropost, user: wronguser) }
+      before do
+        sign_in user
+        visit root_path
+      end
+
+      it "should not have delete link for wrong user's post" do
+        should_not have_link('delete')
+      end
+    end      
   end
+
 
   describe "Help page" do
     before { visit help_path }  
